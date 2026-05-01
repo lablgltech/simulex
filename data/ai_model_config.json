@@ -1,0 +1,6 @@
+{
+  "stage1_model": "google/gemini-3-flash-preview",
+  "stage3_model": "google/gemini-3-flash-preview",
+  "tutor_model": "google/gemini-3-flash-preview",
+  "report_model": "google/gemini-3-flash-preview"
+}

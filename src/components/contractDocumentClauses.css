@@ -1,0 +1,109 @@
+/**
+ * Список пунктов договора — те же отступы и ритм, что у .clauses-list / .clause на этапе 3.
+ * Используется на этапе 2 (оценка рисков); классы с префиксом simulex-contract- не конфликтуют с .clause этапа 3.
+ */
+
+.simulex-contract-clauses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 10px 18px 10px 18px;
+}
+
+.simulex-contract-clause-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: visible;
+  margin-bottom: 4px;
+}
+
+.simulex-contract-clauses-list > .simulex-contract-clause-stack:last-child {
+  margin-bottom: 0;
+}
+
+.simulex-contract-section-heading {
+  box-sizing: border-box;
+  white-space: pre-wrap;
+  padding: 6px 14px 4px 14px;
+  font-weight: 700;
+  font-size: 12pt;
+  line-height: 1.2;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.simulex-contract-clause-surface {
+  position: relative;
+  box-sizing: border-box;
+  padding: 2px 14px 2px 14px;
+  padding-left: 14px;
+  border: none;
+  border-radius: 0;
+  background: #ffffff;
+  transition: background-color 0.2s ease, border-left-color 0.2s ease, opacity 0.15s ease;
+}
+
+.simulex-contract-clause-surface::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: var(--simulex-clause-strip, #e5e7eb);
+}
+
+/* Пункт можно открыть для оценки риска — лёгкая подсветка */
+.simulex-contract-clause-surface--available {
+  background: rgba(14, 165, 233, 0.06);
+  cursor: pointer;
+}
+
+.simulex-contract-clause-surface--available:hover {
+  background: rgba(14, 165, 233, 0.1);
+}
+
+/* Активный выбранный пункт */
+.simulex-contract-clause-surface--selected {
+  background: rgba(14, 165, 233, 0.14);
+  cursor: pointer;
+}
+
+.simulex-contract-clause-surface--selected:hover {
+  background: rgba(14, 165, 233, 0.17);
+}
+
+/* Другой пункт выбран — ненавязчивое затемнение, как у обсуждаемых на этапе 3 */
+.simulex-contract-clause-surface--dimmed {
+  opacity: 0.52;
+  cursor: pointer;
+}
+
+.simulex-contract-clause-surface--dimmed:hover {
+  opacity: 0.62;
+}
+
+.simulex-contract-clause-inner {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+}
+
+.simulex-contract-clause-num {
+  font-weight: 700;
+  font-size: 12pt;
+  line-height: 1.2;
+  color: #1a1a1a;
+  flex-shrink: 0;
+}
+
+.simulex-contract-clause-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 12pt;
+  line-height: 1.2;
+  color: #1a1a1a;
+}

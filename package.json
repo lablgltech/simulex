@@ -1,0 +1,53 @@
+{
+  "name": "simulex-platform",
+  "version": "0.1.0",
+  "description": "Simulex: демонстрация базовой версии сервиса (React + FastAPI + PostgreSQL)",
+  "license": "UNLICENSED",
+  "main": "src/index.js",
+  "scripts": {
+    "sync-moks": "mkdir -p public/moks && cp moks/*.png public/moks/ 2>/dev/null || true",
+    "prestart": "npm run sync-moks",
+    "prebuild": "npm run sync-moks",
+    "start": "react-scripts start",
+    "dev": "concurrently \"npm run backend:dev\" \"npm run client:dev\"",
+    "backend:dev": "node scripts/run-backend-dev.cjs",
+    "backend:start": "node scripts/run-backend-dev.cjs",
+    "backend": "cd backend && python3 main.py",
+    "client:dev": "react-scripts start",
+    "build": "react-scripts build",
+    "build:production": "NODE_ENV=production react-scripts build",
+    "test": "react-scripts test",
+    "install:production": "npm ci --production --legacy-peer-deps",
+    "install:clean": "rm -rf node_modules package-lock.json && npm install",
+    "postinstall": "echo '✅ Зависимости установлены'",
+    "clean": "rm -rf node_modules build .cache",
+    "size": "du -sh node_modules 2>/dev/null || echo 'node_modules не найден'"
+  },
+  "dependencies": {
+    "@tremor/react": "^3.18.7",
+    "framer-motion": "^11.18.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.20.0",
+    "recharts": "^3.8.1",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^6.0.2"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "react-scripts": "5.0.1"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "http://127.0.0.1:5000"
+}

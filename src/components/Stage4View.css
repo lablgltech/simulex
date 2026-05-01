@@ -1,0 +1,1702 @@
+/* Этап 4: Кризис — стили в духе этапа 1 (нейтральный фон, белые карточки, лёгкие тени) */
+.stage4-app {
+  --stage4-bg: #f5f5f5;
+  --stage4-surface: #ffffff;
+  --stage4-text: #1f1e1a;
+  --stage4-text-muted: #64748b;
+  --stage4-accent: #10b981;
+  --stage4-accent-hover: #059669;
+  --stage4-accent-soft: #d1fae5;
+  --stage4-warning: #d97706;
+  --stage4-warning-bg: #fffbeb;
+  --stage4-failure: #dc2626;
+  --stage4-failure-bg: #fef2f2;
+  --stage4-border: #e5e7eb;
+  /* Таймлайн: два сегмента (как на референсах — разделение фаз без «кричащих» градиентов) */
+  --stage4-tl-a: #0f766e;
+  --stage4-tl-a-line: rgba(15, 118, 110, 0.35);
+  --stage4-tl-a-soft: rgba(15, 118, 110, 0.08);
+  --stage4-tl-b: #4338ca;
+  --stage4-tl-b-line: rgba(67, 56, 202, 0.38);
+  --stage4-tl-b-soft: rgba(67, 56, 202, 0.07);
+  --stage4-radius: 10px;
+  --stage4-radius-sm: 6px;
+  --stage4-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --stage4-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  margin: 0;
+  min-height: 100%;
+  height: 100%;
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--stage4-text);
+  background: var(--stage4-bg);
+  padding: 2rem 1rem 5.75rem;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.stage4-app * { box-sizing: border-box; }
+
+.stage4-app .stage4-container {
+  position: relative;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 1.25rem 1rem 0;
+}
+
+/* Таймлайн в потоке страницы (под заголовком экрана), без sticky. */
+.stage4-app .stage4-persistent-timeline-wrap {
+  position: relative;
+  margin: 0 0 1rem;
+  padding: 0.35rem 0 0.85rem;
+  background: transparent;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.22);
+  max-width: 100%;
+  /* Для snake-режима подписи местами выходят чуть за “визуальные” границы шага. */
+  overflow-x: visible;
+}
+.stage4-app .stage4-persistent-timeline-caption {
+  margin: 0 0 0.85rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0;
+  color: var(--stage4-text);
+  line-height: 1.4;
+}
+.stage4-app .stage4-persistent-timeline-caption-hint {
+  margin: 0 0 0.35rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--stage4-text-muted);
+  background: rgba(59, 130, 246, 0.08);
+  border-left: 3px solid rgba(59, 130, 246, 0.45);
+  border-radius: 0 var(--stage4-radius-sm) var(--stage4-radius-sm) 0;
+}
+
+/* Винтажный «радио»-таймлайн: фиксированная игла в центре, лента прокручивается под ней. */
+.stage4-app .stage4-radio-shell {
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+  cursor: grab;
+  border-top: 1px solid var(--stage4-border);
+  border-bottom: 1px solid var(--stage4-border);
+  padding: 0.55rem 0 0.35rem;
+  background: #f7f7f6;
+}
+.stage4-app .stage4-radio-head {
+  position: relative;
+  min-height: 180px;
+}
+.stage4-app .stage4-radio-shell:active {
+  cursor: grabbing;
+}
+.stage4-app .stage4-radio-needle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-50%);
+  background: rgba(185, 28, 28, 0.32);
+  pointer-events: none;
+  z-index: 5;
+}
+.stage4-app .stage4-radio-needle::before {
+  content: '▼';
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.5rem;
+  color: rgba(185, 28, 28, 0.55);
+}
+.stage4-app .stage4-radio-track {
+  display: flex;
+  align-items: flex-start;
+  will-change: transform;
+  /* transform задаётся из JS по rAF — CSS transition даёт рывки и рассинхрон с easing */
+  transition: none;
+  position: relative;
+  z-index: 1;
+}
+.stage4-app .stage4-radio-dial-line {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  height: 1px;
+  background: #d3cdc4;
+  pointer-events: none;
+  z-index: 1;
+}
+.stage4-app .stage4-radio-spacer {
+  flex: 0 0 auto;
+}
+.stage4-app .stage4-radio-shell .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  row-gap: 0 !important;
+  column-gap: 0 !important;
+  gap: 0 !important;
+  border: none !important;
+  padding-bottom: 0.9rem;
+}
+.stage4-app .stage4-radio-shell .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid::after {
+  display: none !important; /* В радио-режиме используем единую линию .stage4-radio-shell::before */
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.stage4-radio-item {
+  flex: 0 0 220px !important;
+  min-width: 220px !important;
+  max-width: 220px !important;
+  width: 220px !important;
+  position: relative;
+  z-index: 3;
+  background: transparent;
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.stage4-radio-item::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 13px;
+  width: 1px;
+  height: 6px;
+  background: #c8c3be;
+  z-index: 1;
+}
+/* Разделитель между колонками (не на всю высоту блока) */
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.stage4-radio-item:not(:first-child)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 26%;
+  height: 48%;
+  width: 1px;
+  background: rgba(55, 65, 81, 0.38);
+  z-index: 4;
+  pointer-events: none;
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.stage4-timeline-filler .stage4-radio-event-card {
+  min-height: 2.25rem;
+  justify-content: center;
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.stage4-timeline-filler .timeline-main-horizontal-label:empty {
+  display: none;
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.stage4-timeline-filler .timeline-horizontal-dot {
+  transform: scale(0.72);
+  opacity: 0.4;
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.stage4-timeline-filler .timeline-main-horizontal-date {
+  font-size: 0.8rem;
+  color: var(--stage4-text-muted, #6b7280);
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.stage4-timeline-signing-prep .timeline-main-horizontal-date {
+  font-weight: 650;
+  color: var(--stage4-text);
+}
+/* Последняя точка исхода: лёгкое горизонтальное болтанье, пока не показан текст (длина ≈ OUTCOME_WIGGLE_MS в Stage4View.js) */
+@keyframes stage4-outcome-wiggle {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  12% {
+    transform: translateX(-5px);
+  }
+  28% {
+    transform: translateX(4px);
+  }
+  44% {
+    transform: translateX(-3px);
+  }
+  60% {
+    transform: translateX(2px);
+  }
+  76% {
+    transform: translateX(-1px);
+  }
+  92% {
+    transform: translateX(0.5px);
+  }
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.stage4-outcome-last-wiggle {
+  animation: stage4-outcome-wiggle 0.9s ease-in-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage4-app .stage4-radio-shell .timeline-main-horizontal-item.stage4-outcome-last-wiggle {
+    animation: none;
+  }
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.active .timeline-horizontal-dot {
+  transform: scale(1.55);
+  box-shadow: 0 0 0 6px rgba(217, 119, 6, 0.15);
+}
+.stage4-app .stage4-radio-shell .timeline .timeline-horizontal-dot {
+  width: 12px;
+  height: 12px;
+  border-width: 2px;
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.active .timeline-main-horizontal-date {
+  color: var(--stage4-text);
+  font-style: normal;
+}
+.stage4-app .stage4-radio-event-card {
+  margin-top: 0.15rem;
+  width: 196px;
+  min-height: 78px;
+  padding: 0.45rem 0.6rem 0.55rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  text-align: center;
+  line-height: 1.35;
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.active .stage4-radio-event-card {
+  box-shadow: none;
+}
+.stage4-app .stage4-radio-shell .stage4-radio-event-card .timeline-main-horizontal-date {
+  display: block;
+  margin-bottom: 0.22rem;
+}
+.stage4-app .stage4-radio-shell .stage4-radio-event-card .timeline-main-horizontal-label {
+  display: block;
+  font-size: 0.78rem;
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.warn .stage4-radio-event-card .timeline-main-horizontal-label {
+  color: var(--stage4-warning);
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.warn .stage4-radio-event-card .timeline-main-horizontal-date {
+  color: #9a6a25;
+}
+/* Кризис остаётся красным даже при status: warn и в радио-режиме (иначе перебивает блок .warn выше). */
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.crisis .stage4-radio-event-card .timeline-main-horizontal-label {
+  color: var(--stage4-failure);
+  font-weight: 600;
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.crisis .stage4-radio-event-card .timeline-main-horizontal-date {
+  color: var(--stage4-failure);
+  font-weight: 600;
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.crisis.active .timeline-main-horizontal-date {
+  color: var(--stage4-failure);
+  font-style: normal;
+}
+.stage4-app .stage4-radio-shell .timeline-main-horizontal-item.crisis.active .timeline-horizontal-dot {
+  box-shadow: 0 0 0 6px rgba(185, 28, 28, 0.18);
+}
+.stage4-app .stage4-radio-detail {
+  border-top: 1px solid var(--stage4-border);
+  padding: 0.95rem 0 0.3rem;
+  min-height: 4.4rem;
+}
+.stage4-app .stage4-radio-detail-month {
+  margin: 0 0 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.78rem;
+  color: var(--stage4-text-muted);
+  font-weight: 600;
+}
+.stage4-app .stage4-radio-detail-text {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #8a5a2b;
+}
+.stage4-app .stage4-radio-detail--crisis-active .stage4-radio-detail-month {
+  color: var(--stage4-failure);
+}
+.stage4-app .stage4-radio-detail--crisis-active .stage4-radio-detail-text {
+  color: var(--stage4-failure);
+}
+/* Возврат к договору: «возможное будущее» — приглушённая шкала, полые точки. */
+.stage4-app .stage4-persistent-timeline-wrap--timetravel {
+  border-bottom-style: dashed;
+  border-bottom-color: rgba(100, 116, 139, 0.45);
+}
+.stage4-app .stage4-timeline-timetravel.timeline-main-horizontal {
+  border-bottom-style: dashed;
+  border-bottom-color: rgba(148, 163, 184, 0.65);
+}
+.stage4-app .stage4-timeline-timetravel .timeline-main-horizontal-item.visible {
+  opacity: 0.88;
+}
+.stage4-app .stage4-timeline-timetravel .timeline-main-horizontal-label {
+  color: var(--stage4-text-muted);
+  font-weight: 500;
+}
+.stage4-app .stage4-timeline-timetravel .timeline-main-horizontal-item.crisis .timeline-main-horizontal-label {
+  color: rgba(153, 27, 27, 0.92);
+  font-weight: 600;
+}
+.stage4-app .stage4-timeline-timetravel .timeline-main-horizontal-item .timeline-horizontal-dot {
+  background: transparent !important;
+  border: 2px dashed var(--stage4-border);
+  box-shadow: none;
+}
+.stage4-app .stage4-timeline-timetravel .timeline-main-horizontal-item.done .timeline-horizontal-dot,
+.stage4-app .stage4-timeline-timetravel .timeline-main-horizontal-item.warn .timeline-horizontal-dot,
+.stage4-app .stage4-timeline-timetravel .timeline-main-horizontal-item.fail .timeline-horizontal-dot {
+  background: transparent !important;
+  box-shadow: none;
+}
+.stage4-app .stage4-timeline-timetravel .timeline-main-horizontal-item.crisis .timeline-horizontal-dot {
+  border-color: rgba(220, 38, 38, 0.55);
+  border-style: dashed;
+}
+.stage4-app .stage4-persistent-timeline-inner.timeline-main-horizontal {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+/*
+ * Постоянный горизонтальный таймлайн: ряд шагов с переносом строки.
+ * Раньше была CSS-grid с min(12rem,100%) — при одной видимой точке (кат-сцена) получалась
+ * одна колонка на всю ширину и тот же «вертикальный» стек слева, хотя это был не split-режим.
+ */
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid {
+  /* Возвращаем flex-wrap, чтобы ничего не обрезалось по высоте/ширине.
+     Порядок элементов (snake) задаём в JS. */
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  direction: ltr !important;
+  justify-content: flex-start !important;
+  align-items: flex-start;
+  align-content: flex-start;
+  row-gap: 0.9rem;
+  column-gap: 1rem;
+  overflow-x: visible !important;
+  width: 100%;
+  border-bottom: none !important;
+  padding-bottom: 1.65rem;
+  position: relative;
+}
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0.35rem;
+  height: 2px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, var(--stage4-tl-a-line), var(--stage4-tl-b-line));
+  opacity: 0.9;
+  pointer-events: none;
+}
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid .timeline-main-horizontal-item {
+  /* Фиксируем ширину “колонки”, чтобы точки попадали одна под другой. */
+  flex: 0 0 13.5rem !important;
+  min-width: 13.5rem !important;
+  max-width: 13.5rem !important;
+  width: 13.5rem !important;
+  align-items: center;
+  text-align: center;
+  /* Вернём читаемое направление текста на LTR внутри RTL-контейнера. */
+  direction: ltr;
+}
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid .timeline-main-horizontal-date {
+  align-self: center;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
+}
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid .timeline-main-horizontal-label {
+  width: 100%;
+  text-align: center;
+  line-height: 1.35;
+  hyphens: auto;
+  overflow-wrap: break-word;
+}
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid .timeline-main-horizontal-item .timeline-horizontal-dot {
+  margin-bottom: 0.35rem;
+}
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid .timeline-horizontal-dot {
+  align-self: center;
+  margin-left: 0;
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--stage4-border);
+  background: var(--stage4-surface);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+/* Snake: grid на всю ширину контейнера (как flex-wrap на других экранах), без горизонтального скролла */
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid.stage4-timeline-snake-grid {
+  display: grid !important;
+  flex-direction: unset !important;
+  flex-wrap: unset !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: 1rem;
+  row-gap: 0.9rem;
+  justify-content: stretch;
+  justify-items: stretch;
+  align-items: start;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+}
+
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid.stage4-timeline-snake-grid .timeline-main-horizontal-item {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  flex: none !important;
+}
+
+/* Граница второго сегмента сдвигает карточку — ломает колонки */
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid.stage4-timeline-snake-grid .timeline-main-horizontal-item.stage4-timeline-second-segment-start {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  border-left: none !important;
+}
+
+/* В snake-режиме не клиппим подписи горизонтального таймлайна. */
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid .timeline-main-horizontal-label {
+  overflow: visible !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
+}
+/* Один шаг: не растягиваем «рельсу» на весь экран */
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid.stage4-persistent-timeline-inner--single {
+  justify-content: center;
+}
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid.stage4-persistent-timeline-inner--single::after {
+  left: 50%;
+  right: auto;
+  width: min(18rem, 72%);
+  transform: translateX(-50%);
+}
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid.stage4-persistent-timeline-inner--single .timeline-main-horizontal-item {
+  flex: 0 1 26rem;
+  max-width: 26rem;
+}
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid .timeline-main-horizontal-item.done .timeline-horizontal-dot {
+  background: var(--stage4-surface);
+  border-color: var(--stage4-accent);
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.2), 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid .timeline-main-horizontal-item.warn .timeline-horizontal-dot {
+  background: var(--stage4-surface);
+  border-color: var(--stage4-warning);
+}
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid .timeline-main-horizontal-item.fail .timeline-horizontal-dot {
+  background: var(--stage4-surface);
+  border-color: var(--stage4-failure);
+}
+.stage4-app .timeline.timeline-main-horizontal.stage4-persistent-timeline-inner--grid .timeline-main-horizontal-item.crisis .timeline-horizontal-dot {
+  border-color: var(--stage4-failure);
+}
+.stage4-app .stage4-timeline-timetravel.timeline-main-horizontal.stage4-persistent-timeline-inner--grid .timeline-main-horizontal-item .timeline-horizontal-dot {
+  background: transparent !important;
+  border: 2px dashed var(--stage4-border) !important;
+  box-shadow: none !important;
+}
+.stage4-app .stage4-timeline-timetravel.timeline-main-horizontal.stage4-persistent-timeline-inner--grid .timeline-main-horizontal-item.crisis .timeline-horizontal-dot {
+  border-color: rgba(220, 38, 38, 0.55) !important;
+}
+.stage4-app .stage4-timeline-split {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.stage4-app .stage4-timeline-segment-gap {
+  height: 0;
+  margin: 0.5rem 0 0.65rem;
+  border: 0;
+  border-top: none;
+  background: none;
+  position: relative;
+}
+.stage4-app .stage4-timeline-segment-gap::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 1.5rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--stage4-border), transparent);
+}
+/* Вторая волна: вертикальный список — минималистичный «инфографический» вид в духе этапа 4 */
+.stage4-app .stage4-timeline-segment {
+  background: var(--stage4-surface);
+  border: 1px solid var(--stage4-border);
+  border-radius: var(--stage4-radius);
+  padding: 0.75rem 1rem 0.45rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 12px rgba(15, 23, 42, 0.04);
+  overflow-x: clip;
+  max-width: 100%;
+  min-width: 0;
+}
+.stage4-app .stage4-timeline-segment--first {
+  border-top: 3px solid var(--stage4-tl-a);
+  background: linear-gradient(180deg, var(--stage4-tl-a-soft) 0%, var(--stage4-surface) 2.25rem);
+}
+.stage4-app .stage4-timeline-segment--second {
+  border-top: 3px solid var(--stage4-tl-b);
+  background: linear-gradient(180deg, var(--stage4-tl-b-soft) 0%, var(--stage4-surface) 2.25rem);
+}
+.stage4-app .stage4-timeline-segment .stage4-timeline-segment-label {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.68rem;
+  font-weight: 700;
+  margin: 0 0 0.4rem;
+}
+.stage4-app .stage4-timeline-segment--first .stage4-timeline-segment-label {
+  color: var(--stage4-tl-a);
+}
+.stage4-app .stage4-timeline-segment--second .stage4-timeline-segment-label {
+  color: var(--stage4-tl-b);
+}
+.stage4-app .stage4-persistent-timeline-inner--vertical {
+  display: flex !important;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0.15rem 0 0;
+  padding: 0;
+  border: none;
+  margin-left: 0;
+  box-sizing: border-box;
+  overflow-x: clip;
+}
+.stage4-app .stage4-timeline-vertical-step {
+  margin: 0;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  text-align: left;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+.stage4-app .stage4-timeline-vertical-step.visible {
+  opacity: 1;
+}
+/* Колонка как в референсе: полый кружок → дата → текст, всё слева */
+.stage4-app .stage4-timeline-vertical-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  max-width: 36rem;
+}
+.stage4-app .stage4-timeline-vertical-marker {
+  display: flex;
+  justify-content: flex-start;
+  padding: 0;
+}
+.stage4-app .stage4-timeline-vertical-marker .timeline-horizontal-dot {
+  margin: 0;
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid var(--stage4-border);
+  background: var(--stage4-surface);
+  box-shadow: none;
+}
+.stage4-app .stage4-timeline-vertical-date {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #5e6488;
+  text-transform: lowercase;
+  line-height: 1.3;
+  text-align: left;
+  width: 100%;
+  letter-spacing: 0.01em;
+}
+.stage4-app .stage4-timeline-vertical-text {
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  text-align: left;
+  font-size: 0.9rem;
+  color: var(--stage4-text);
+  font-weight: 400;
+  width: 100%;
+}
+.stage4-app .stage4-timeline-vertical-step.crisis .stage4-timeline-vertical-text {
+  color: var(--stage4-failure);
+  font-weight: 600;
+}
+.stage4-app .stage4-timeline-vertical-step.done .timeline-horizontal-dot {
+  background: var(--stage4-surface);
+  border-color: var(--stage4-accent);
+  border-width: 1.5px;
+  box-shadow: none;
+}
+.stage4-app .stage4-timeline-vertical-step.warn .timeline-horizontal-dot {
+  background: var(--stage4-surface);
+  border-color: var(--stage4-warning);
+  border-width: 1.5px;
+  box-shadow: none;
+}
+.stage4-app .stage4-timeline-vertical-step.fail .timeline-horizontal-dot {
+  background: var(--stage4-surface);
+  border-color: var(--stage4-failure);
+  border-width: 1.5px;
+  box-shadow: none;
+}
+.stage4-app .timeline-main-horizontal-item.stage4-timeline-second-segment-start {
+  margin-left: 0.5rem;
+  padding-left: 0.65rem;
+  border-left: 2px dashed var(--stage4-border);
+}
+
+.stage4-app .phase {
+  display: none;
+  animation: stage4-fadeIn 0.4s ease;
+}
+.stage4-app .phase.active {
+  display: block;
+}
+
+@keyframes stage4-fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stage4-app h1 {
+  font-family: var(--font-ui);
+  font-size: 1.65rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--stage4-text);
+  margin: 0 0 0.5rem;
+  line-height: 1.3;
+}
+.stage4-app .subtitle {
+  font-size: 0.95rem;
+  color: var(--stage4-text-muted);
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+/* Пустой экран до закрытия входящего письма (модалка в GameView) */
+.stage4-app .stage4-intro-blank {
+  min-height: min(50vh, 420px);
+}
+
+/* Фаза кат-сцены: выравнивание по левому краю внутри контейнера (контейнер уже и по центру страницы) */
+.stage4-app #phaseCutscene {
+  text-align: left;
+}
+
+/* Подсказка перед первой катсценой (текст: STAGE4_CUTSCENE_CLICK_HINT в Stage4View.js) */
+.stage4-app #phaseCutscene {
+  position: relative;
+}
+.cutscene-click-hint {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 245, 245, 0.7);
+  animation: cutsceneHintFadeIn 0.4s ease;
+}
+.cutscene-click-hint__text {
+  font-size: 1.15rem;
+  color: var(--stage4-text-muted, #64748b);
+  letter-spacing: 0.02em;
+  padding: 0.8rem 1.6rem;
+  border: 1.5px dashed var(--stage4-border, #e5e7eb);
+  border-radius: var(--stage4-radius, 10px);
+  background: var(--stage4-surface, #fff);
+  box-shadow: var(--stage4-shadow-card, 0 2px 8px rgba(0,0,0,0.1));
+  user-select: none;
+  pointer-events: none;
+  animation: cutsceneHintPulse 2s ease-in-out infinite;
+}
+@keyframes cutsceneHintFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes cutsceneHintPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+/* Итог этапа — как кат-сцена: та же ширина контейнера, без отдельного сжатия секции */
+.stage4-app #phaseSecondOutcome {
+  text-align: left;
+}
+
+/* Фаза 1: Кат-сцена — таймлайн горизонтальный с реальными датами (июль 2026 + N месяцев) */
+.stage4-app .timeline {
+  position: relative;
+  padding-left: 2rem;
+  border-left: 2px solid var(--stage4-border);
+  margin: 2rem 0;
+}
+/* Горизонтальный основной таймлайн: даты вида «июль 2026». id — чтобы легко найти в DevTools. */
+#stage4-timeline-horizontal,
+.stage4-timeline-persistent:not(.stage4-persistent-timeline-inner--vertical),
+.stage4-app .timeline.timeline-main-horizontal:not(.stage4-persistent-timeline-inner--vertical) {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 0.5rem 0 1.5rem;
+  border-left: none !important;
+  border-bottom: 2px solid var(--stage4-border);
+  margin: 2rem 0;
+  gap: 0.75rem;
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+.stage4-app .timeline-main-horizontal-item {
+  flex: 0 0 auto;
+  min-width: 5rem;
+  max-width: 10rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.stage4-app .timeline-main-horizontal-item.visible {
+  opacity: 1;
+}
+.stage4-app .timeline-main-horizontal-item .timeline-horizontal-dot {
+  margin-bottom: 0.35rem;
+}
+.stage4-app .timeline-main-horizontal-date {
+  font-size: 0.7rem;
+  color: var(--stage4-text-muted);
+  font-weight: 600;
+  text-transform: lowercase;
+  margin-bottom: 0.25rem;
+  line-height: 1.2;
+}
+.stage4-app .timeline-main-horizontal-label {
+  font-size: 0.75rem;
+  color: var(--stage4-text);
+  line-height: 1.35;
+  font-weight: 500;
+}
+.stage4-app .timeline-main-horizontal-item.crisis .timeline-main-horizontal-label {
+  color: var(--stage4-failure);
+  font-weight: 600;
+}
+.stage4-app .timeline-main-horizontal-item.done .timeline-horizontal-dot {
+  background: var(--stage4-accent);
+}
+.stage4-app .timeline-main-horizontal-item.warn .timeline-horizontal-dot {
+  background: var(--stage4-warning);
+}
+.stage4-app .timeline-main-horizontal-item.fail .timeline-horizontal-dot {
+  background: var(--stage4-failure);
+}
+.stage4-app .timeline-item {
+  position: relative;
+  padding-bottom: 1.5rem;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.stage4-app .timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -2rem;
+  top: 0.25rem;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  border-radius: 50%;
+  background: var(--stage4-border);
+  border: none;
+  box-shadow: none;
+}
+.stage4-app .timeline-item.done::before {
+  background: var(--stage4-accent);
+}
+.stage4-app .timeline-item.warn::before {
+  background: var(--stage4-warning);
+}
+.stage4-app .timeline-item.fail::before {
+  background: var(--stage4-failure);
+}
+.stage4-app .timeline-item.visible {
+  opacity: 1;
+}
+.stage4-app .timeline-item .month {
+  font-size: 0.75rem;
+  color: var(--stage4-text-muted);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.stage4-app .timeline-item .label {
+  font-weight: 500;
+  color: var(--stage4-text);
+  line-height: 1.45;
+  font-size: 0.95rem;
+}
+.stage4-app .timeline-item.crisis .label {
+  color: var(--stage4-failure);
+  font-weight: 600;
+}
+/* Блок кризиса под таймлайном — карточка в стиле этапа 1 (белый фон, рамка, тень) */
+.stage4-app .timeline-pause {
+  margin-top: 1rem;
+  margin-right: auto;
+  max-width: 100%;
+  padding: 1rem 1.25rem;
+  background: var(--stage4-surface);
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-family: var(--font-reading);
+  font-size: 1rem;
+  color: #991b1b;
+  line-height: 1.55;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  box-shadow: var(--stage4-shadow);
+}
+.stage4-app .timeline-pause.visible {
+  opacity: 1;
+}
+
+/* Диагностика: зона «Оцените ситуацию» + описание кризиса — как .timeline-pause (белая карточка, красная рамка, бордовый текст) */
+.stage4-app .stage4-diagnostic-situation {
+  margin: 1rem 0 1.5rem;
+  max-width: 100%;
+  padding: 1rem 1.25rem;
+  background: var(--stage4-surface);
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  box-shadow: var(--stage4-shadow);
+}
+.stage4-app .stage4-diagnostic-situation-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #991b1b;
+  margin: 0 0 0.65rem;
+  line-height: 1.35;
+}
+.stage4-app .stage4-diagnostic-situation-text {
+  margin: 0;
+  font-size: 1rem;
+  color: #991b1b;
+  line-height: 1.55;
+}
+
+/* Горизонтальный сводный таймлайн (итог этапа: первый + второй кризис) */
+.stage4-app .stage4-summary-timeline-wrap {
+  margin: 2rem 0;
+  padding: 1rem 0;
+}
+.stage4-app .stage4-summary-timeline-caption {
+  font-size: 0.9rem;
+  color: var(--stage4-text-muted);
+  margin: 0 0 1rem;
+}
+.stage4-app .timeline.timeline-horizontal {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 0.5rem 0 1.5rem;
+  border-left: none;
+  border-bottom: 2px solid var(--stage4-border);
+  margin: 0;
+  gap: 0;
+  position: relative;
+}
+.stage4-app .timeline-horizontal-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  position: relative;
+}
+.stage4-app .timeline-horizontal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--stage4-border);
+  flex-shrink: 0;
+  z-index: 1;
+  position: relative;
+  margin-bottom: 0.35rem;
+}
+.stage4-app .timeline-horizontal-item.done .timeline-horizontal-dot {
+  background: var(--stage4-accent);
+  box-shadow: 0 0 0 2px var(--stage4-accent-soft);
+}
+.stage4-app .timeline-horizontal-item.warn .timeline-horizontal-dot {
+  background: var(--stage4-warning);
+  box-shadow: 0 0 0 2px var(--stage4-warning-bg);
+}
+.stage4-app .timeline-horizontal-item.fail .timeline-horizontal-dot {
+  background: var(--stage4-failure);
+  box-shadow: 0 0 0 2px var(--stage4-failure-bg);
+}
+.stage4-app .timeline-horizontal-item.neutral .timeline-horizontal-dot {
+  background: var(--stage4-border);
+}
+.stage4-app .timeline-horizontal-month {
+  font-size: 0.7rem;
+  color: var(--stage4-text-muted);
+  font-weight: 600;
+}
+.stage4-app .timeline-horizontal-label {
+  font-size: 0.65rem;
+  color: var(--stage4-text-muted);
+  text-align: center;
+  margin-top: 0.2rem;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Кнопки */
+.stage4-app .btn-next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 2rem;
+  padding: 0.9rem 1.75rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--stage4-surface);
+  background: var(--stage4-accent);
+  border: none;
+  border-radius: var(--stage4-radius);
+  cursor: pointer;
+  box-shadow: var(--stage4-shadow);
+  transition: background 0.2s, transform 0.1s;
+}
+.stage4-app .btn-next:hover { background: var(--stage4-accent-hover); }
+.stage4-app .btn-next:active { transform: scale(0.98); }
+.stage4-app .btn-next:focus-visible { outline: 2px solid var(--stage4-accent); outline-offset: 2px; }
+.stage4-app .btn-next:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Фаза 2: Диагностика — горизонтальный формат вариантов */
+.stage4-app .diagnostic-block { margin: 2rem 0; }
+.stage4-app .diagnostic-q {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: var(--stage4-surface);
+  border-radius: var(--stage4-radius);
+  border: 1px solid var(--stage4-border);
+  box-shadow: var(--stage4-shadow);
+  transition: box-shadow 0.2s;
+}
+.stage4-app .diagnostic-q:hover { box-shadow: var(--stage4-shadow-card); }
+.stage4-app .diagnostic-q h3 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--stage4-text);
+  line-height: 1.4;
+}
+.stage4-app .diagnostic-options {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+.stage4-app .diagnostic-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex: 1 1 200px;
+  min-width: 0;
+  min-height: 3.5rem;
+  padding: 0.9rem 1rem;
+  border-radius: var(--stage4-radius-sm);
+  cursor: pointer;
+  border: 2px solid var(--stage4-border);
+  background: var(--stage4-surface);
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 3px rgba(44, 41, 37, 0.04);
+}
+.stage4-app .diagnostic-option:hover {
+  background: var(--stage4-accent-soft);
+  border-color: var(--stage4-accent);
+}
+.stage4-app .diagnostic-option input {
+  margin: 0.2rem 0 0;
+  flex-shrink: 0;
+}
+.stage4-app .diagnostic-option-text {
+  font-family: var(--font-reading);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--stage4-text);
+  word-break: break-word;
+}
+.stage4-app .diagnostic-option.selected,
+.stage4-app .diagnostic-option:has(input:checked) {
+  border-color: var(--stage4-accent);
+  background: var(--stage4-accent-soft);
+  box-shadow: 0 0 0 1px var(--stage4-accent);
+}
+.stage4-app .diagnostic-option.selected .diagnostic-option-text,
+.stage4-app .diagnostic-option:has(input:checked) .diagnostic-option-text {
+  font-weight: 600;
+  color: var(--stage4-text);
+}
+.stage4-app .diagnostic-q .hint {
+  font-size: 0.85rem;
+  color: var(--stage4-text-muted);
+  margin-top: 0.5rem;
+}
+.stage4-app .btn-submit { margin-top: 1rem; }
+
+/* Фаза 3: Выбор возврат / принять */
+.stage4-app .choice-block { margin: 2rem 0; }
+.stage4-app .choice-block .buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  align-items: stretch;
+}
+.stage4-app .choice-block .buttons .btn-next,
+.stage4-app .choice-block .buttons .btn-secondary {
+  flex: 1 1 200px;
+  min-width: 200px;
+}
+.stage4-app .btn-secondary {
+  padding: 0.9rem 1.5rem;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--stage4-text);
+  background: var(--stage4-surface);
+  border: 2px solid var(--stage4-border);
+  border-radius: var(--stage4-radius);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  box-shadow: var(--stage4-shadow);
+}
+.stage4-app .btn-secondary:hover {
+  border-color: var(--stage4-text-muted);
+  background: var(--stage4-bg);
+  box-shadow: var(--stage4-shadow-card);
+}
+.stage4-app .btn-secondary:focus-visible { outline: 2px solid var(--stage4-accent); outline-offset: 2px; }
+.stage4-app .btn-secondary:disabled {
+  opacity: 0.65;
+  cursor: wait;
+  pointer-events: none;
+}
+
+/* Блок описания кризиса на экране возврата к договору */
+.stage4-app .contract-crisis-block {
+  margin: 1rem 0 1.25rem;
+  padding: 1rem 1.25rem;
+  background: var(--stage4-surface);
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-family: var(--font-reading);
+  font-size: 1rem;
+  color: #991b1b;
+  line-height: 1.55;
+  box-shadow: var(--stage4-shadow);
+}
+.stage4-app .contract-crisis-block .contract-crisis-text {
+  margin: 0;
+}
+
+/* Фаза 3c: Договор */
+.stage4-app .contract-block {
+  background: var(--stage4-surface);
+  border-radius: var(--stage4-radius);
+  padding: 1.5rem;
+  margin: 2rem 0;
+  box-shadow: var(--stage4-shadow);
+  border: 1px solid var(--stage4-border);
+  transition: box-shadow 0.2s;
+}
+.stage4-app .contract-block:hover { box-shadow: var(--stage4-shadow-card); }
+.stage4-app .contract-block .heading {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--stage4-text-muted);
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+.stage4-app .contract-block .clause {
+  font-family: var(--font-reading);
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--stage4-text);
+  margin-bottom: 1rem;
+}
+.stage4-app .contract-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  font-family: var(--font-reading);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--stage4-text);
+  background: var(--stage4-surface);
+  border: 2px solid var(--stage4-border);
+  border-radius: var(--stage4-radius-sm);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+.stage4-app .contract-option:hover {
+  border-color: var(--stage4-accent);
+  background: var(--stage4-accent-soft);
+}
+.stage4-app .contract-option .opt-label {
+  font-weight: 600;
+  color: var(--stage4-accent);
+  margin-bottom: 0.35rem;
+  display: block;
+}
+.stage4-app .contract-option .opt-desc { color: var(--stage4-text-muted); font-size: 0.9rem; }
+.stage4-app .contract-option .opt-warn { color: var(--stage4-failure); font-size: 0.85rem; margin-top: 0.25rem; }
+.stage4-app .contract-option .opt-ok { color: var(--stage4-accent); font-size: 0.85rem; margin-top: 0.25rem; }
+.stage4-app .contract-option.selected {
+  border-color: var(--stage4-accent);
+  background: var(--stage4-accent-soft);
+  box-shadow: 0 0 0 1px var(--stage4-accent);
+}
+.stage4-app .contract-option:focus-visible { outline: 2px solid var(--stage4-accent); outline-offset: 2px; }
+
+/* Фаза 4: Финальный исход */
+.stage4-app .outcome-block.stage4-outcome-reveal,
+.stage4-app .stage4-second-outcome-wrap.stage4-outcome-reveal,
+.stage4-app .stage4-diagnostic-reveal-wrap.stage4-outcome-reveal {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.stage4-app .outcome-block.stage4-outcome-reveal.visible,
+.stage4-app .stage4-second-outcome-wrap.stage4-outcome-reveal.visible,
+.stage4-app .stage4-diagnostic-reveal-wrap.stage4-outcome-reveal.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.stage4-app .stage4-second-outcome-wrap .outcome-block {
+  margin-top: 0;
+}
+.stage4-app .outcome-block {
+  margin: 2rem 0;
+  padding: 1.5rem 1.75rem;
+  background: var(--stage4-surface);
+  border-radius: var(--stage4-radius);
+  border: 1px solid var(--stage4-border);
+  box-shadow: var(--stage4-shadow-card);
+}
+.stage4-app .outcome-block h2 {
+  font-family: var(--font-ui);
+  font-size: 1.2rem;
+  margin: 0 0 1rem;
+  color: var(--stage4-text);
+  font-weight: 600;
+}
+.stage4-app .outcome-block .outcome-text {
+  font-family: var(--font-reading);
+  margin-bottom: 1.5rem;
+  line-height: 1.7;
+  color: var(--stage4-text);
+}
+.stage4-app .outcome-block .lexic {
+  font-size: 0.85rem;
+  color: var(--stage4-text-muted);
+  margin-top: 1rem;
+}
+.stage4-app .btn-end {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--stage4-accent);
+  background: transparent;
+  border: 2px solid var(--stage4-accent);
+  border-radius: var(--stage4-radius);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+.stage4-app .btn-end:hover { background: var(--stage4-accent-soft); color: var(--stage4-accent-hover); }
+.stage4-app .btn-end:focus-visible { outline: 2px solid var(--stage4-accent); outline-offset: 2px; }
+
+/* «Завершить этап» — как на этапах 2–3: зелёная кнопка, фиксированно внизу справа (ниже z-index модалок этапа) */
+.stage4-app .stage4-complete-dock {
+  position: fixed;
+  right: max(1rem, env(safe-area-inset-right, 0px));
+  bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  z-index: 950;
+}
+.stage4-app .stage4-complete-btn {
+  padding: 10px 20px;
+  border-radius: var(--stage4-radius-sm);
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  background-color: #10b981;
+  color: #fff;
+  box-shadow: var(--stage4-shadow);
+}
+.stage4-app .stage4-complete-btn:hover:not(:disabled) {
+  background-color: #059669;
+}
+.stage4-app .stage4-complete-btn:disabled {
+  background-color: #9ca3af;
+  cursor: not-allowed;
+}
+.stage4-app .stage4-complete-btn:disabled[aria-busy='true'] {
+  background-color: #6ee7b7;
+  color: #fff;
+  cursor: wait;
+  opacity: 0.92;
+}
+
+/* Письмо Дока — попап в стиле писем этапов (как NewEmailModal) */
+.stage4-app .stage4-doc-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+.stage4-app .stage4-doc-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+.stage4-app .stage4-doc-modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3), 0 4px 8px rgba(60, 64, 67, 0.15);
+}
+/* Письмо Дока: шире, без отдельной прокрутки в теле — карточка целиком при нехватке высоты */
+.stage4-app .stage4-doc-modal-content.stage4-email-style {
+  padding: 0;
+  width: min(900px, calc(100vw - 2rem));
+  max-width: min(900px, calc(100vw - 2rem));
+  max-height: min(96vh, 960px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+/* Верхняя панель */
+.stage4-app .stage4-email-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-bottom: 1px solid #e8eaed;
+  background: #f8f9fa;
+  min-height: 48px;
+}
+.stage4-app .stage4-email-badge {
+  font-size: 12px;
+  background: #e8f0fe;
+  color: #1967d2;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+/* Тема письма */
+.stage4-app .stage4-email-subject {
+  padding: 20px 24px 8px;
+  border-bottom: 1px solid #e8eaed;
+}
+.stage4-app .stage4-email-subject h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 400;
+  color: #202124;
+  line-height: 1.3;
+  letter-spacing: 0.02px;
+  font-family: inherit;
+}
+/* Блок отправителя */
+.stage4-app .stage4-email-from {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px 16px;
+  border-bottom: 1px solid #e8eaed;
+}
+.stage4-app .stage4-email-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  object-fit: cover;
+}
+.stage4-app .stage4-email-avatar-placeholder {
+  background: #1a73e8;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 500;
+}
+.stage4-app .stage4-email-from-meta {
+  flex: 1;
+  min-width: 0;
+}
+.stage4-app .stage4-email-from-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #202124;
+  margin-bottom: 2px;
+}
+.stage4-app .stage4-email-from-time {
+  font-size: 12px;
+  color: #5f6368;
+}
+/* Тело письма — без внутреннего скролла; при длинном тексте прокручивается вся карточка модалки */
+.stage4-app .stage4-email-body {
+  padding: 20px 24px;
+  overflow: visible;
+  flex: 0 0 auto;
+  min-height: 0;
+}
+.stage4-app .stage4-email-body-text {
+  font-family: var(--font-reading);
+  line-height: 1.6;
+  color: #202124;
+  font-size: 14px;
+  margin: 0 0 1rem;
+}
+/* Письмо Дока: markdown из MarkdownContent — компактнее блоки */
+.stage4-app .stage4-doc-letter-markdown.simulex-content {
+  line-height: 1.55 !important;
+  color: #202124 !important;
+  font-size: 14px;
+}
+.stage4-app .stage4-doc-letter-markdown.simulex-content h1,
+.stage4-app .stage4-doc-letter-markdown.simulex-content h2,
+.stage4-app .stage4-doc-letter-markdown.simulex-content h3 {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #1e293b !important;
+  margin-top: 12px !important;
+  margin-bottom: 6px !important;
+}
+.stage4-app .stage4-doc-letter-markdown.simulex-content h1:first-child,
+.stage4-app .stage4-doc-letter-markdown.simulex-content h2:first-child,
+.stage4-app .stage4-doc-letter-markdown.simulex-content h3:first-child,
+.stage4-app .stage4-doc-letter-markdown.simulex-content p:first-child {
+  margin-top: 0 !important;
+}
+.stage4-app .stage4-doc-letter-markdown.simulex-content p {
+  margin-bottom: 8px !important;
+}
+.stage4-app .stage4-doc-letter-markdown.simulex-content ul {
+  margin-bottom: 8px !important;
+}
+.stage4-app .stage4-doc-letter-markdown.simulex-content li {
+  margin-bottom: 4px !important;
+}
+/* Нижняя панель с кнопками */
+.stage4-app .stage4-email-footer {
+  padding: 12px 24px 16px;
+  border-top: 1px solid #e8eaed;
+  background: #fff;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.stage4-app .stage4-email-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: inherit;
+}
+.stage4-app .stage4-email-btn-primary {
+  background: #1a73e8;
+  color: #fff;
+}
+.stage4-app .stage4-email-btn-primary:hover {
+  background: #1765cc;
+}
+.stage4-app .stage4-email-btn-secondary {
+  background: #fff;
+  color: #202124;
+  border: 1px solid #dadce0;
+}
+.stage4-app .stage4-email-btn-secondary:hover {
+  background: #f8f9fa;
+}
+
+/* Письмо Дока — карточка с аватаром и текстом (внутри попапа) */
+.stage4-app .doc-letter-block {
+  display: flex;
+  gap: 1.5rem;
+  margin: 0 0 2rem;
+  padding: 1.75rem;
+  background: var(--stage4-surface);
+  border-radius: var(--stage4-radius);
+  border: 1px solid var(--stage4-border);
+  box-shadow: var(--stage4-shadow);
+  align-items: flex-start;
+}
+.stage4-app .doc-avatar {
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  overflow: hidden;
+  border: 2px solid var(--stage4-border);
+  box-shadow: var(--stage4-shadow);
+}
+.stage4-app .doc-avatar-placeholder {
+  background: var(--stage4-accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+.stage4-app .doc-letter-block .contract-block {
+  flex: 1;
+  min-width: 0;
+  font-style: italic;
+  white-space: pre-line;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: var(--stage4-text);
+}
+
+/* ——— Визуальный эффект после возврата в договор ——— */
+.stage4-app .stage4-return-replay {
+  position: relative;
+  margin: 2rem 0;
+}
+.stage4-app .stage4-return-timeline .timeline-main-horizontal-item,
+.stage4-app .stage4-return-timeline .stage4-timeline-vertical-step {
+  transition: opacity 0.5s ease;
+}
+/* Мигание точки кризиса: красный ↔ зелёный */
+.stage4-app .timeline-main-horizontal-item.crisis-blink-red .timeline-horizontal-dot,
+.stage4-app .timeline-item.crisis-blink-red::before {
+  background: var(--stage4-failure) !important;
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.6);
+  animation: stage4-crisis-pulse 0.4s ease;
+}
+.stage4-app .timeline-main-horizontal-item.crisis-blink-green .timeline-horizontal-dot,
+.stage4-app .timeline-item.crisis-blink-green::before {
+  background: var(--stage4-accent) !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+  animation: stage4-crisis-pulse 0.4s ease;
+}
+.stage4-app .timeline-main-horizontal-item.crisis-settled-green .timeline-horizontal-dot,
+.stage4-app .timeline-item.crisis-settled-green::before {
+  background: var(--stage4-accent) !important;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.5);
+}
+.stage4-app .timeline-main-horizontal-item.crisis-settled-red .timeline-horizontal-dot,
+.stage4-app .timeline-item.crisis-settled-red::before {
+  background: var(--stage4-failure) !important;
+  box-shadow: 0 0 14px rgba(220, 38, 38, 0.5);
+}
+/* Вертикальный таймлайн: кольцевые маркеры — тот же смысл, без заливки кружка */
+.stage4-app .stage4-timeline-vertical-step.crisis-blink-red .timeline-horizontal-dot {
+  background: var(--stage4-surface) !important;
+  border-color: var(--stage4-failure) !important;
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.55);
+  animation: stage4-crisis-pulse 0.4s ease;
+}
+.stage4-app .stage4-timeline-vertical-step.crisis-blink-green .timeline-horizontal-dot {
+  background: var(--stage4-surface) !important;
+  border-color: var(--stage4-accent) !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.55);
+  animation: stage4-crisis-pulse 0.4s ease;
+}
+.stage4-app .stage4-timeline-vertical-step.crisis-settled-green .timeline-horizontal-dot {
+  background: var(--stage4-surface) !important;
+  border-color: var(--stage4-accent) !important;
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.3), 0 0 14px rgba(16, 185, 129, 0.45);
+}
+.stage4-app .stage4-timeline-vertical-step.crisis-settled-red .timeline-horizontal-dot {
+  background: var(--stage4-surface) !important;
+  border-color: var(--stage4-failure) !important;
+  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.25), 0 0 14px rgba(220, 38, 38, 0.45);
+}
+.stage4-app .timeline-main-horizontal-item.crisis-settled-green .timeline-main-horizontal-label,
+.stage4-app .timeline-item.crisis-settled-green .label,
+.stage4-app .stage4-timeline-vertical-step.crisis-settled-green .stage4-timeline-vertical-text {
+  color: var(--stage4-accent);
+  font-weight: 600;
+}
+.stage4-app .timeline-main-horizontal-item.crisis-settled-red .timeline-main-horizontal-label,
+.stage4-app .timeline-item.crisis-settled-red .label,
+.stage4-app .stage4-timeline-vertical-step.crisis-settled-red .stage4-timeline-vertical-text {
+  color: var(--stage4-failure);
+  font-weight: 600;
+}
+@keyframes stage4-crisis-pulse {
+  from { transform: scale(1); }
+  50% { transform: scale(1.25); }
+  to { transform: scale(1); }
+}
+
+/* Конфетти */
+.stage4-app .stage4-confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  overflow: hidden;
+}
+.stage4-app .stage4-confetti-piece {
+  position: absolute;
+  top: -20px;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: stage4-confetti-fall 3s ease-in forwards;
+  transform: translateX(-50%);
+}
+@keyframes stage4-confetti-fall {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) rotate(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(100vh) rotate(720deg);
+  }
+}
+
+/* Док Браун на машине времени — медленный въезд, чтобы было время разглядеть */
+.stage4-app .stage4-doc-timemachine {
+  position: fixed;
+  bottom: 20%;
+  left: -180px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: left 2s cubic-bezier(0.2, 0.9, 0.35, 1);
+  pointer-events: none;
+}
+.stage4-app .stage4-doc-timemachine.stage4-doc-at-center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+.stage4-app .stage4-doc-timemachine.stage4-doc-greeting {
+  /* реплика показывается отдельно от позиции */
+}
+.stage4-app .stage4-doc-car {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(145deg, #374151 0%, #1f2937 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), 0 0 0 2px #4b5563;
+}
+.stage4-app .stage4-doc-car::before {
+  content: '';
+  position: absolute;
+  left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-right-color: #1f2937;
+}
+.stage4-app .stage4-doc-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center top;
+  border: 2px solid var(--stage4-accent);
+}
+.stage4-app .stage4-doc-avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--stage4-accent);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border: 2px solid #fff;
+}
+.stage4-app .stage4-doc-carlabel {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  font-weight: 500;
+}
+.stage4-app .stage4-doc-speech {
+  position: relative;
+  margin-top: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--stage4-surface);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border: 2px solid var(--stage4-accent);
+  font-weight: 600;
+  color: var(--stage4-text);
+  max-width: 280px;
+  text-align: center;
+  animation: stage4-fadeIn 0.5s ease;
+}
+.stage4-app .stage4-doc-speech::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-bottom-color: var(--stage4-accent);
+}
+

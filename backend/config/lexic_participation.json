@@ -1,0 +1,27 @@
+{
+  "stage1": {
+    "empty_max_conclusion_len": 40,
+    "token_max_bad_questions": 2,
+    "token_min_insights": 2,
+    "token_max_conclusion_len": 60,
+    "min_good_medium_straight": 2,
+    "combo_min_good_medium": 1,
+    "combo_min_insights": 2,
+    "combo_min_conclusion_len": 80,
+    "heavy_min_insights": 4,
+    "heavy_min_good_medium": 1
+  },
+  "stage2": {
+    "score_floor_pct": 12,
+    "min_found_ratio_of_total": 0.12,
+    "min_found_absolute_floor": 2,
+    "token_max_found_risks": 1,
+    "token_max_score_pct": 22
+  },
+  "stage3": {
+    "min_player_turns": 3
+  },
+  "stage4": {
+    "min_diagnosis_answers": 3
+  }
+}

@@ -1,0 +1,88 @@
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+node_modules/
+build/
+dist/
+.DS_Store
+
+# npm
+.npm
+npm-debug.log*
+package-lock.json.backup
+
+# Кэш
+.cache/
+.parcel-cache/
+
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+data/*.json
+!data/case.json
+!data/onboarding.json
+!data/ai_model_config.json
+*.json.bak
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+backend/venv/
+backend/env/
+backend/.venv
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Деплой: в репозитории только nginx-simulex.conf; остальное — локально, не коммитить
+deploy/*
+!deploy/nginx-simulex.conf
+deploy/README.md
+deploy/CHECKLIST.md
+deploy/DEPLOY-VPS.md
+docs/DEPLOYMENT.md
+deploy.sh
+# deploy-to-prod.sh — в репозитории (см. README)
+server-setup.sh
+ex/v0.5beta/deploy/
+*.deploy.*
+
+# Локальные заметки и идеи (не синхронизировать с GitHub)
+ideas/
+
+# Локальный обмен с материалами (docx, черновики) — не в репозиторий
+share/
+
+# Cursor IDE
+.cursor/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Сборка полной документации в один файл (scripts/build_full_documentation.py)
+docs/PROJECT_DOCUMENTATION_FULL.md
+
+# Локальные отладочные выгрузки
+tmp_pytest.txt
+nameerror_traceback.txt
+
+# QA-вложения (скриншоты)
+data/uploads/

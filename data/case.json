@@ -1,0 +1,32 @@
+{
+  "case": {
+    "id": "shell",
+    "title": "Каркас платформы (демо)",
+    "description": "Минимальный сценарий без учебного контента: один этап с кнопкой завершения. Добавьте свои case*.json и при необходимости каталог data/cases/<id>/ для ресурсов.",
+    "status": "published",
+    "version": 1,
+    "tags": ["platform", "demo"],
+    "stages": [
+      {
+        "id": "stage-demo",
+        "order": 1,
+        "type": "shell",
+        "title": "Демо-этап",
+        "intro": "Эта сборка **Simulex Platform** — урезанный каркас: без Симуграма, без шкалы LEXIC в интерфейсе и без папок с контентом кейсов. Нажмите действие ниже и завершите этап, чтобы проверить цепочку сессии и отчёта.",
+        "points_budget": 10,
+        "actions": [
+          {
+            "id": "shell-demo-action",
+            "title": "Выполнить демо-действие",
+            "type": "text",
+            "is_required": true,
+            "costs": { "time": 0, "points": 1 },
+            "lexic_impact": { "L": 0, "E": 0, "X": 0, "I": 0, "C": 0 },
+            "prerequisites": []
+          }
+        ],
+        "emails": []
+      }
+    ]
+  }
+}

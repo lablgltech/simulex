@@ -1,0 +1,41 @@
+# Игнорируемые файлы при публикации пакета (если будет)
+# Для оптимизации node_modules
+
+# Документация
+*.md
+!README.md
+CHANGELOG*
+LICENSE*
+*.txt
+
+# Тесты
+test/
+tests/
+__tests__/
+*.test.js
+*.spec.js
+
+# Примеры
+examples/
+example/
+demo/
+*.example.js
+
+# Конфигурация разработки
+.editorconfig
+.eslintrc*
+.prettierrc*
+tsconfig.json
+jest.config.js
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Другое
+.DS_Store
+*.log
+.vscode/
+.idea/
